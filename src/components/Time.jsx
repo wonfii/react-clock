@@ -10,45 +10,39 @@ function Time() {
     week: '',
   });
 
-  const LoadInfo = () => {
-    const url = 'http://worldtimeapi.org/api/timezone/Europe/Kyiv';
+  const updateTimeInfo = () => {
+    const now = new Date();
 
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        const time = data.datetime.slice(11, 19); // Формат часу HH:MM:SS
-        const date = new Date(data.datetime);
+    const time = now.toLocaleTimeString('en-GB');
 
-        // День тижня
-        const dayOfWeek = [
-          'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-        ][date.getDay()];
+    const dayOfWeek = [
+      'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+    ][now.getDay()];
 
-        // Місяць
-        const monthText = [
-          'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-          'September', 'October', 'November', 'December'
-        ][date.getMonth()];
+    const monthText = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
+    ][now.getMonth()];
 
-        setTimeInfo({
-          time: time,
-          day: dayOfWeek,
-          date: date.getDate(),
-          month: monthText,
-          year: date.getFullYear(),
-          week: data.week_number,
-        });
+    const getWeekNumber = (date) => {
+      const startOfYear = new Date(date.getFullYear(), 0, 1);
+      const pastDaysOfYear = (date - startOfYear) / 86400000; 
+      return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+    };
 
-        console.log(data);
-      })
-      .catch(e => console.error('Error fetching time:', e));
+    setTimeInfo({
+      time: time,
+      day: dayOfWeek,
+      date: now.getDate(),
+      month: monthText,
+      year: now.getFullYear(),
+      week: getWeekNumber(now),
+    });
   };
 
   useEffect(() => {
-    LoadInfo();
-    const interval = setInterval(() => {
-      LoadInfo(); 
-    }, 1000);
+    updateTimeInfo();
+    const interval = setInterval(updateTimeInfo, 1000);
 
     return () => clearInterval(interval);
   }, []);
